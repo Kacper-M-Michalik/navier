@@ -1,0 +1,11 @@
+#!/bin/bash
+cd $1
+for f in *.ppm
+do
+   echo Converting $f
+   convert -quality 100 $f `basename $f ppm`jpg
+done 
+ffmpeg -r 25 -i %06d.jpg -c:v libx264 -pix_fmt yuv420p -crf 15 $1.mp4
+mv $1.mp4 ../.
+cd ../.
+

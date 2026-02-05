@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     int output = 0;
     int output_frequency = 0;
 
-    double t_end = 2.1;       /* Simulation runtime */
+    double t_end = 40; //2.1       /* Simulation runtime */
     double del_t = 0.003;      /* Duration of each timestep */
     double tau = 0.5;          /* Safety factor for timestep control */
 
@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
     double t, delx, dely;
     int  i, j, itersor = 0, ifluid = 0, ibound = 0;
     double res;
-    double **u, **v, **p, **rhs, **f, **g;
-    char  **flag;
+    double *u, *v, *p, *rhs, *f, *g;
+    char  *flag;
     int init_case, iters = 0;
     int show_help = 0, show_usage = 0, show_version = 0;
 
@@ -86,49 +86,47 @@ int main(int argc, char *argv[])
 
     // Set up initial values
     for (i=0;i<=imax+1;i++) {
-         for (j=0;j<=jmax+1;j++) {
-   	     checker += (i*jmax)+ j + 1;
-	     checker1 += (i*jmax) + j + 1.0;
-             u[i][j] = ui;
-             v[i][j] = vi;
-             p[i][j] = 0.0;
-         }
-     }
+        for (j=0;j<=jmax+1;j++) {
+            checker += (i*jmax)+ j + 1;
+            checker1 += (i*jmax) + j + 1.0;
+            u[LOC(i, j)] = ui;
+            v[LOC(i, j)] = vi;
+            p[LOC(i, j)] = 0.0;
+        }
+    }     
 
     init_flag(flag, imax, jmax, delx, dely, &ibound);
-    
+    printf("ibound:%d", ibound);
     apply_boundary_conditions(u, v, flag, imax, jmax, ui, vi);
     
     // Main loop
 
-    for (t = 0.0; t < t_end; t += del_t, iters++) {
+    for (t = 0.0; t < t_end; t += del_t, iters++) 
+    {
         set_timestep_interval(&del_t, imax, jmax, delx, dely, u, v, Re, tau);
 
         ifluid = (imax * jmax) - ibound;
 
-        compute_tentative_velocity(u, v, f, g, flag, imax, jmax,
-            del_t, delx, dely, gamma, Re);
+        compute_tentative_velocity(u, v, f, g, flag, imax, jmax, del_t, delx, dely, gamma, Re);
 
         compute_rhs(f, g, rhs, flag, imax, jmax, del_t, delx, dely);
 
         if (ifluid > 0) {
-            itersor = poisson(p, rhs, flag, imax, jmax, delx, dely,
-                        eps, itermax, omega, &res, ifluid);
+            itersor = poisson(p, rhs, flag, imax, jmax, delx, dely, eps, itermax, omega, &res, ifluid);
         } else {
             itersor = 0;
         }
 
-         printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n",
-                iters, t+del_t, del_t, itersor, res, ibound);
+        printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n", iters, t+del_t, del_t, itersor, res, ibound);
 	
         update_velocity(u, v, f, g, p, flag, imax, jmax, del_t, delx, dely);
 
         apply_boundary_conditions(u, v, flag, imax, jmax, ui, vi);
 
-	if (output && (iters % output_frequency == 0)) {
-	  write_ppm(u, v, p, flag, imax, jmax, xlength, ylength, outname,
-		    iters, output_frequency);
-	}
+        // if (output && (iters % output_frequency == 0)) {
+        //   write_ppm(u, v, p, flag, imax, jmax, xlength, ylength, outname,
+        //       iters, output_frequency);
+        // }
     }
 
     free_matrix(u);
@@ -142,28 +140,28 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// Used for comparing computations when debugging other implementations
+// // Used for comparing computations when debugging other implementations
 
-unsigned int simplest_checksum_char(char** in, int imax, int jmax) {
-  unsigned int checksum = 0;
-  int i;
-  int j;
-  for (i=0; i<(imax+2); i++){
-    for (j=0; j<(jmax+2); j++){
-      checksum+=in[i][j]*(i);
-    }
-  }
-  return checksum;
-}
+// unsigned int simplest_checksum_char(char** in, int imax, int jmax) {
+//   unsigned int checksum = 0;
+//   int i;
+//   int j;
+//   for (i=0; i<(imax+2); i++){
+//     for (j=0; j<(jmax+2); j++){
+//       checksum+=in[i][j]*(i);
+//     }
+//   }
+//   return checksum;
+// }
 
-double simplest_checksum(double** in, int imax, int jmax) {
-  double checksum = 0.0;
-  int i;
-  int j;
-  for (i=0; i<(imax+2); i++){
-    for (j=0; j<(jmax+2); j++){
-      checksum+=in[i][j]*((double)(i*jmax)+j);
-    }
-  }
-  return checksum;
-}
+// double simplest_checksum(double** in, int imax, int jmax) {
+//   double checksum = 0.0;
+//   int i;
+//   int j;
+//   for (i=0; i<(imax+2); i++){
+//     for (j=0; j<(jmax+2); j++){
+//       checksum+=in[i][j]*((double)(i*jmax)+j);
+//     }
+//   }
+//   return checksum;
+// }

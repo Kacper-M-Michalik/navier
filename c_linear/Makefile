@@ -1,5 +1,5 @@
 CC:=gcc
-CFLAGS:=-O3 -Wall -g -pg
+CFLAGS:=-O2 -Wall -g -pg
 shared: CFLAGS += -fPIC
 
 navier: alloc.o boundary.o init.o main.o output.o simulation.o
