@@ -15,7 +15,7 @@
     int output_frequency = 0;
 */
 
-int simulate(int verbose, double xlength, double ylength, int imax, int jmax, double t_end, double del_t, double tau, 
+int simulate(int verbose, char* outname, int output, int output_frequency, double xlength, double ylength, int imax, int jmax, double t_end, double del_t, double tau, 
 int itermax, double eps, double omega, double gamma, double Re, double ui, double vi, 
 double** u, double** v, double** p, double** rhs, double** f, double** g, char** flag)
 {
@@ -68,14 +68,20 @@ double** u, double** v, double** p, double** rhs, double** f, double** g, char**
             itersor = 0;
         }
 
-        // Change
-        printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n",
+        if (verbose)
+        {
+            printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n",
                 iters, t+del_t, del_t, itersor, res, ibound);
-
+        }
 	
         update_velocity(u, v, f, g, p, flag, imax, jmax, del_t, delx, dely);
 
         apply_boundary_conditions(u, v, flag, imax, jmax, ui, vi);
+
+        if (output && (iters % output_frequency == 0)) {
+            write_ppm(u, v, p, flag, imax, jmax, xlength, ylength, outname,
+                iters, output_frequency);
+        }
     }
 
     return 0;

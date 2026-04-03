@@ -118,17 +118,20 @@ int main(int argc, char *argv[])
             itersor = 0;
         }
 
-         printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n",
-                iters, t+del_t, del_t, itersor, res, ibound);
-	
+        if (verbose) 
+        {
+          printf("%d t:%g, del_t:%g, SOR iters:%3d, res:%e, bcells:%d\n", 
+            iters, t+del_t, del_t, itersor, res, ibound);
+        }
+
         update_velocity(u, v, f, g, p, flag, imax, jmax, del_t, delx, dely);
 
         apply_boundary_conditions(u, v, flag, imax, jmax, ui, vi);
 
-	if (output && (iters % output_frequency == 0)) {
-	  write_ppm(u, v, p, flag, imax, jmax, xlength, ylength, outname,
-		    iters, output_frequency);
-	}
+        if (output && (iters % output_frequency == 0)) {
+          write_ppm(u, v, p, flag, imax, jmax, xlength, ylength, outname,
+            iters, output_frequency);
+        }
     }
 
     free_matrix(u);

@@ -30,9 +30,9 @@ void init_flag(char **flag, int imax, int jmax, double delx, double dely,
     rad1 = 5.0/41.0*jmax*dely;
     for (i=1;i<=imax;i++) {
         for (j=1;j<=jmax;j++) {
-            x = (i-0.5)*delx - mx;
-            y = (j-0.5)*dely - my;
-            flag[i][j] = (x*x + y*y <= rad1*rad1)?C_B:C_F;
+            x = ((i-0.5)*delx) - mx;
+            y = ((j-0.5)*dely) - my;
+            flag[i][j] = ((x*x) + (y*y) <= (rad1*rad1)) ? C_B:C_F;
         }
     }
     
